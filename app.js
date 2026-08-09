@@ -12,6 +12,7 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 require('dotenv').config(); // importation biblio dotenv
 
+const coonectToDataBase = require('./config/mongo.connect').connectDB(); // importation biblio mongo.connect
 // create express app
 var app = express();
 
@@ -44,5 +45,6 @@ app.use(function(err, req, res, next) {
 const server = http.createServer(app);
 
 server.listen(process.env.PORT , () => {
+  coonectToDataBase;
   console.log(`Server is running on port ${process.env.PORT}`);
 });
