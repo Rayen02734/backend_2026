@@ -16,7 +16,7 @@ var educationRouter = require('./routes/Education.routes');
 var paymentRouter = require('./routes/Payment.routes');
 require('dotenv').config();
 
-const connectToDatabase = require('./config/mongo.connect').connectDB();
+const { connectToMongoDB } = require('./config/mogo.connection');
 
 var app = express();
 
@@ -51,9 +51,7 @@ app.use(function(err, req, res, next) {
 
 const server = http.createServer(app);
 
-const port = process.env.PORT || 5000;
-
-server.listen(port, async () => {
-  await connectToDatabase();
-  console.log(`Server is running on port ${port}`);
+server.listen(process.env.PORT, () => {
+   connectToMongoDB();
+  console.log(`Server is running on port ${process.env.PORT}`);
 });
