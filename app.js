@@ -9,22 +9,29 @@ var logger = require('morgan');
 const http = require('http'); // importation biblio http
 
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
-require('dotenv').config(); // importation biblio dotenv
+var adminRouter = require('./routes/Admin.routes');
+var teacherRouter = require('./routes/Teacher.routes');
+var studentRouter = require('./routes/Student.routes');
+var educationRouter = require('./routes/Education.routes');
+var paymentRouter = require('./routes/Payment.routes');
+require('dotenv').config();
 
-const coonectToDataBase = require('./config/mongo.connect').connectDB(); // importation biblio mongo.connect
-// create express app
+const connectToDatabase = require('./config/mongo.connect').connectDB();
+
 var app = express();
 
-// setup 
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());// cookie ysajel fil local mouch fil base data
+app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/admins', adminRouter);
+app.use('/teachers', teacherRouter);
+app.use('/students', studentRouter);
+app.use('/educations', educationRouter);
+app.use('/payments', paymentRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -44,7 +51,9 @@ app.use(function(err, req, res, next) {
 
 const server = http.createServer(app);
 
-server.listen(process.env.PORT , () => {
-  coonectToDataBase;
-  console.log(`Server is running on port ${process.env.PORT}`);
+const port = process.env.PORT || 5000;
+
+server.listen(port, async () => {
+  await connectToDatabase();
+  console.log(`Server is running on port ${port}`);
 });
