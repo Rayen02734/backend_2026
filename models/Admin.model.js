@@ -6,6 +6,8 @@ const adminSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true, trim: true, lowercase: true },
   password: { type: String, required: true },
   login: { type: Boolean, default: true },
+  students: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Student' }],// relation 1-n
+  teachers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Teacher' }],// realation 1-n
   createdAt: { type: Date, default: Date.now }
 }, { timestamps: true });
 
