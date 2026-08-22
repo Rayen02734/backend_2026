@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
 const educationSchema = new mongoose.Schema({
-  students: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Student' }], // relation 1-n
-  teacherId: { type: mongoose.Schema.Types.ObjectId, ref: 'Teacher', required: true }, //1-n
+  students: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Student' }],
+  teacherId: { type: mongoose.Schema.Types.ObjectId, ref: 'Teacher', required: true }, 
   startDate: { type: Date, required: true },
   endDate: { type: Date, required: true },
   programme: { type: String, required: true, trim: true },

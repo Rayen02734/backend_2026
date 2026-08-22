@@ -6,8 +6,8 @@ const teacherSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true, trim: true, lowercase: true },
   password: { type: String, required: true },
   login: { type: Boolean, default: true },
-  adminId: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin' }, // relation 
-  courses: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Education' }],  // realation 
+  adminId: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin' },  
+  courses: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Education' }],   
   createdAt: { type: Date, default: Date.now }
 }, { timestamps: true });
 
