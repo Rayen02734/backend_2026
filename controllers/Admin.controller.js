@@ -1,4 +1,73 @@
 const AdminModel = require('../models/Admin.model');
+const StudentModel = require('../models/Student.model');
+const TeacherModel = require('../models/Teacher.model');
+const EducationModel = require('../models/Education.model');
+const PaymentModel = require('../models/Payment.model');
+
+exports.login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const admin = await AdminModel.findOne({ email, password });
+
+    if (!admin) {
+      return res.status(401).json({ success: false, message: 'Email or password is incorrect' });
+    }
+
+    res.status(200).json({ success: true, data: admin });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+exports.managePayments = async (req, res) => {
+  try {
+    const payments = await PaymentModel.find()
+      .populate('studentId', 'name firstName email')
+      .populate('educationId', 'programme');
+    res.status(200).json({ success: true, data: payments });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+exports.manageCourses = async (req, res) => {
+  try {
+    const courses = await EducationModel.find().populate('teacherId', 'name firstName email');
+    res.status(200).json({ success: true, data: courses });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+exports.manageUsers = async (req, res) => {
+  try {
+    const [students, teachers] = await Promise.all([
+      StudentModel.find(),
+      TeacherModel.find()
+    ]);
+    res.status(200).json({ success: true, data: { students, teachers } });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+exports.viewStatistics = async (req, res) => {
+  try {
+    const [admins, students, teachers, courses, payments] = await Promise.all([
+      AdminModel.countDocuments(),
+      StudentModel.countDocuments(),
+      TeacherModel.countDocuments(),
+      EducationModel.countDocuments(),
+      PaymentModel.countDocuments()
+    ]);
+    res.status(200).json({
+      success: true,
+      data: { admins, students, teachers, courses, payments }
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
 
 exports.createAdmin = async (req, res) => {
   try {
