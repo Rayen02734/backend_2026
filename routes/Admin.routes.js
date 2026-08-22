@@ -7,6 +7,7 @@ router.post('/', adminController.createAdmin);
 router.get('/', adminController.getAllAdmins);
 router.put('/', adminController.updateAdmin);
 router.delete('/', adminController.deleteAdmin);
+
 router.get('/payments', adminController.managePayments);
 router.get('/courses', adminController.manageCourses);
 router.get('/users', adminController.manageUsers);
