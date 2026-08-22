@@ -71,6 +71,11 @@ exports.viewStatistics = async (req, res) => {
 
 exports.createAdmin = async (req, res) => {
   try {
+    const adminExists = await AdminModel.exists();
+    if (adminExists) {
+      return res.status(409).json({ success: false, message: 'An admin already exists' });
+    }
+
     const admin = await AdminModel.create(req.body);
     res.status(201).json({ success: true, data: admin });
   } catch (error) {
@@ -80,8 +85,11 @@ exports.createAdmin = async (req, res) => {
 
 exports.getAllAdmins = async (req, res) => {
   try {
-    const admins = await AdminModel.find();
-    res.status(200).json({ success: true, data: admins });
+    const admin = await AdminModel.findOne();
+    if (!admin) {
+      return res.status(404).json({ success: false, message: 'Admin not found' });
+    }
+    res.status(200).json({ success: true, data: admin });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
@@ -89,7 +97,7 @@ exports.getAllAdmins = async (req, res) => {
 
 exports.getAdminById = async (req, res) => {
   try {
-    const admin = await AdminModel.findById(req.params.id);
+    const admin = await AdminModel.findOne();
     if (!admin) {
       return res.status(404).json({ success: false, message: 'Admin not found' });
     }
@@ -101,7 +109,7 @@ exports.getAdminById = async (req, res) => {
 
 exports.updateAdmin = async (req, res) => {
   try {
-    const admin = await AdminModel.findByIdAndUpdate(req.params.id, req.body, {
+    const admin = await AdminModel.findOneAndUpdate({}, req.body, {
       new: true,
       runValidators: true
     });
@@ -116,7 +124,7 @@ exports.updateAdmin = async (req, res) => {
 
 exports.deleteAdmin = async (req, res) => {
   try {
-    const admin = await AdminModel.findByIdAndDelete(req.params.id);
+    const admin = await AdminModel.findOneAndDelete({});
     if (!admin) {
       return res.status(404).json({ success: false, message: 'Admin not found' });
     }
