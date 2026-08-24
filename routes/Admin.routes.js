@@ -1,14 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/Admin.controller');
-
-
+//crud
 router.post('/', adminController.createAdmin);
 router.get('/', adminController.getAllAdmins);
 router.get('/:id',adminController.getAdminById);
 router.put('/:id', adminController.updateAdmin);
 router.delete('/:id', adminController.deleteAdmin);
-
+//methode
 router.post('/login', adminController.login);
 router.get('/payments', adminController.managePayments);
 router.get('/courses', adminController.manageCourses);
