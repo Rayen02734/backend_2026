@@ -11,7 +11,7 @@ exports.createEducation = async (req, res) => {
 
 exports.getAllEducations = async (req, res) => {
   try {
-    const educations = await EducationModel.find().populate('studentId').populate('teacherId');
+    const educations = await EducationModel.find().populate('students').populate('teacherId');
     res.status(200).json({ success: true, data: educations });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
@@ -20,7 +20,7 @@ exports.getAllEducations = async (req, res) => {
 
 exports.getEducationById = async (req, res) => {
   try {
-    const education = await EducationModel.findById(req.params.id).populate('studentId').populate('teacherId');
+    const education = await EducationModel.findById(req.params.id).populate('students').populate('teacherId');
     if (!education) {
       return res.status(404).json({ success: false, message: 'Education not found' });
     }
@@ -35,7 +35,7 @@ exports.updateEducation = async (req, res) => {
     const education = await EducationModel.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true
-    }).populate('studentId').populate('teacherId');
+    }).populate('students').populate('teacherId');
     if (!education) {
       return res.status(404).json({ success: false, message: 'Education not found' });
     }
@@ -52,6 +52,66 @@ exports.deleteEducation = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Education not found' });
     }
     res.status(200).json({ success: true, message: 'Education deleted successfully' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+exports.trackProgress = async (req, res) => {
+  try {
+    const { progress } = req.body;
+    if (typeof progress !== 'number' || progress < 0 || progress > 100) {
+      return res.status(400).json({ success: false, message: 'Progress must be a number between 0 and 100' });
+    }
+    const education = await EducationModel.findByIdAndUpdate(
+      req.params.id,
+      { progress },
+      { new: true, runValidators: true }
+    );
+    if (!education) {
+      return res.status(404).json({ success: false, message: 'Education not found' });
+    }
+    res.status(200).json({ success: true, data: education });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+exports.recordAttendance = async (req, res) => {
+  try {
+    const { attendance } = req.body;
+    if (typeof attendance !== 'number' || attendance < 0 || attendance > 100) {
+      return res.status(400).json({ success: false, message: 'Attendance must be a number between 0 and 100' });
+    }
+    const education = await EducationModel.findByIdAndUpdate(
+      req.params.id,
+      { attendance },
+      { new: true, runValidators: true }
+    );
+    if (!education) {
+      return res.status(404).json({ success: false, message: 'Education not found' });
+    }
+    res.status(200).json({ success: true, data: education });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+exports.updateStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    if (!['active', 'completed', 'pending'].includes(status)) {
+      return res.status(400).json({ success: false, message: 'Status must be active, completed, or pending' });
+    }
+    const education = await EducationModel.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true, runValidators: true }
+    );
+    if (!education) {
+      return res.status(404).json({ success: false, message: 'Education not found' });
+    }
+    res.status(200).json({ success: true, data: education });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }

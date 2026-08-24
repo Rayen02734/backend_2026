@@ -56,3 +56,58 @@ exports.deletePayment = async (req, res) => {
     res.status(400).json({ success: false, message: error.message });
   }
 };
+
+exports.processPayment = async (req, res) => {
+  try {
+    const payment = await PaymentModel.findById(req.params.id);
+    if (!payment) {
+      return res.status(404).json({ success: false, message: 'Payment not found' });
+    }
+    if (payment.status === 'refunded') {
+      return res.status(409).json({ success: false, message: 'A refunded payment cannot be processed' });
+    }
+
+    payment.transactionId = payment.transactionId || req.body.transactionId || `TX-${Date.now()}-${payment._id.toString().slice(-6)}`;
+    payment.status = 'pending';
+    await payment.save();
+    res.status(200).json({ success: true, data: payment });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+exports.validatePayment = async (req, res) => {
+  try {
+    const payment = await PaymentModel.findById(req.params.id);
+    if (!payment) {
+      return res.status(404).json({ success: false, message: 'Payment not found' });
+    }
+    if (payment.status !== 'pending') {
+      return res.status(409).json({ success: false, message: 'Only pending payments can be validated' });
+    }
+
+    payment.status = 'paid';
+    await payment.save();
+    res.status(200).json({ success: true, data: payment });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+exports.refundPayment = async (req, res) => {
+  try {
+    const payment = await PaymentModel.findById(req.params.id);
+    if (!payment) {
+      return res.status(404).json({ success: false, message: 'Payment not found' });
+    }
+    if (payment.status !== 'paid') {
+      return res.status(409).json({ success: false, message: 'Only paid payments can be refunded' });
+    }
+
+    payment.status = 'refunded';
+    await payment.save();
+    res.status(200).json({ success: true, data: payment });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
