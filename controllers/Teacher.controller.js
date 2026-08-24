@@ -1,6 +1,7 @@
 const TeacherModel = require('../models/Teacher.model');
 const EducationModel = require('../models/Education.model');
 
+
 exports.createTeacher = async (req, res) => {
   try {
     const teacher = await TeacherModel.create(req.body);
@@ -53,6 +54,25 @@ exports.deleteTeacher = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Teacher not found' });
     }
     res.status(200).json({ success: true, message: 'Teacher deleted successfully' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+exports.login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const teacher = await TeacherModel.findOne({
+      email: email.trim().toLowerCase(),
+      password,
+      login: true
+    });
+
+    if (!teacher) {
+      return res.status(401).json({ success: false, message: 'Email or password is incorrect' });
+    }
+
+    res.status(200).json({ success: true, data: teacher });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
