@@ -8,8 +8,7 @@ const educationSchema = new mongoose.Schema({
   programme: { type: String, required: true, trim: true },
   attendance: { type: Number, default: 0 },
   progress: { type: Number, default: 0 },
-  status: { type: String, enum: ['active', 'completed', 'pending'], default: 'pending' },
-  createdAt: { type: Date, default: Date.now }
+  status: { type: String, enum: ['active', 'completed', 'pending'], default: 'pending' }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Education', educationSchema);
