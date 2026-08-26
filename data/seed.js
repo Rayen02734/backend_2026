@@ -11,7 +11,8 @@ const studentsData = require('./seed.student');
 const getEducationData = require('./seed.education');
 const getPaymentData = require('./seed.payment');
 
-const mongoUri = 'mongodb+srv://aziz:Azerty.123@cluster0.bldeeml.mongodb.net/backend_2026';
+
+const mongoUri = process.env.mongo_url;
 
 async function upsertByEmail(Model, documents) {
   return Promise.all(documents.map((document) => Model.findOneAndUpdate(
