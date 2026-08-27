@@ -14,6 +14,7 @@ var teacherRouter = require('./routes/Teacher.routes');
 var studentRouter = require('./routes/Student.routes');
 var educationRouter = require('./routes/Education.routes');
 var paymentRouter = require('./routes/Payment.routes');
+var aiRouter = require('./routes/AI.routes');
 require('dotenv').config();
 
 const { connectToMongoDB } = require('./config/mogo.connection');
@@ -32,6 +33,7 @@ app.use('/teachers', teacherRouter);
 app.use('/students', studentRouter);
 app.use('/educations', educationRouter);
 app.use('/payments', paymentRouter);
+app.use('/ai', aiRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

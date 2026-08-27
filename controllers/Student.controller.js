@@ -1,6 +1,7 @@
 const StudentModel = require('../models/Student.model');
 const EducationModel = require('../models/Education.model');
 const PaymentModel = require('../models/Payment.model');
+const { askGroupUpAI } = require('../services/groupupAI.service');
 
 exports.signUp = async (req, res) => {
   try {
@@ -119,36 +120,35 @@ exports.doQuiz = async (req, res) => {
 
 exports.discussWithAI = async (req, res) => {
   try {
-    const student = await StudentModel.findById(req.params.id);
-    if (!student) return res.status(404).json({ success: false, message: 'Student not found' });
     if (!req.body.message) return res.status(400).json({ success: false, message: 'message is required' });
-    res.status(200).json({ success: true, data: `Bonjour ${student.firstName}, votre message a bien ete recu.` });
+    const answer = await askGroupUpAI({ role: 'student', userId: req.params.id, message: req.body.message });
+    res.status(200).json({ success: true, data: { answer } });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    res.status(error.status || 500).json({ success: false, message: error.message });
   }
 };
 
 exports.askQuestionToAI = async (req, res) => {
   try {
-    const student = await StudentModel.findById(req.params.id);
-    if (!student) return res.status(404).json({ success: false, message: 'Student not found' });
     const { question } = req.body;
     if (!question) return res.status(400).json({ success: false, message: 'question is required' });
-    res.status(200).json({ success: true, data: `Question recue : ${question}` });
+    const answer = await askGroupUpAI({ role: 'student', userId: req.params.id, message: question });
+    res.status(200).json({ success: true, data: { answer } });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    res.status(error.status || 500).json({ success: false, message: error.message });
   }
 };
 
 exports.analyzeProgressWithAI = async (req, res) => {
   try {
-    const student = await StudentModel.findById(req.params.id).populate('courses');
-    if (!student) return res.status(404).json({ success: false, message: 'Student not found' });
-    const totalProgress = student.courses.reduce((total, course) => total + (course.progress || 0), 0);
-    const progress = student.courses.length ? Math.round(totalProgress / student.courses.length) : 0;
-    res.status(200).json({ success: true, data: `Progression moyenne de ${progress}% sur ${student.courses.length} cours.` });
+    const answer = await askGroupUpAI({
+      role: 'student',
+      userId: req.params.id,
+      message: 'Analyse ma progression dans mes formations.'
+    });
+    res.status(200).json({ success: true, data: { answer } });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    res.status(error.status || 500).json({ success: false, message: error.message });
   }
 };
 
