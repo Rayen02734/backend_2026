@@ -77,8 +77,14 @@ async function askGroupUpAI({ role, userId, message }) {
 
   const ai = new GoogleGenAI({ apiKey: process.env.api_key_ia });
   const request = {
-    model: process.env.api_key_ia || 'gemini-2.5-flash',
-    contents: `${systemPrompt}\nContexte autorise (JSON):\n${JSON.stringify(context)}\n\nDemande:\n${message}`
+    model: 'gemini-2.5-flash',
+    contents: `${systemPrompt}
+
+Contexte GroupUp :
+${JSON.stringify(context, null, 2)}
+
+Demande :
+${message}`
   };
   if (wantsExternalSearch(message)) request.tools = [{ googleSearch: {} }];
 
