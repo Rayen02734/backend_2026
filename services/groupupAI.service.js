@@ -77,7 +77,7 @@ async function askGroupUpAI({ role, userId, message }) {
 
   const ai = new GoogleGenAI({ apiKey: process.env.api_key_ia });
   const request = {
-    model: 'gemini-2.5-flash',
+    model: 'gemini-3.6-flash',
     contents: `${systemPrompt}
 
 Contexte GroupUp :
