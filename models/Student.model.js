@@ -6,6 +6,8 @@ const studentSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true, trim: true, lowercase: true },
   password: { type: String, required: true },
   login: { type: Boolean, default: true },
+  loginOtpHash: { type: String, select: false },
+  loginOtpExpiresAt: { type: Date, select: false },
   adminId: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin' }, 
   courses: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Education' }], 
   createdAt: { type: Date, default: Date.now }

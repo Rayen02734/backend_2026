@@ -12,6 +12,8 @@ router.delete('/:id', studentController.deleteStudent);
 // methodes
 router.post('/signup', studentController.signUp);
 router.post('/login', studentController.login);
+router.post('/verify-login', studentController.verifyLogin);
+router.post('/resend-login-code', studentController.resendLoginCode);
 router.post('/:id/purchase-course', studentController.purchaseCourse);
 router.post('/:id/quiz', studentController.doQuiz);
 router.post('/:id/discuss-ai', studentController.discussWithAI);

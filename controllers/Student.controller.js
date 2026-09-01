@@ -2,6 +2,22 @@ const StudentModel = require('../models/Student.model');
 const EducationModel = require('../models/Education.model');
 const PaymentModel = require('../models/Payment.model');
 const { askGroupUpAI } = require('../services/groupupAI.service');
+const crypto = require('crypto');
+const { sendLoginCode } = require('../services/email.service');
+
+const LOGIN_OTP_DURATION_MS = 10 * 60 * 1000;
+
+const createLoginOtp = () => String(crypto.randomInt(100000, 1000000));
+
+const hashLoginOtp = (code) => crypto.createHash('sha256').update(code).digest('hex');
+
+const publicStudent = (student) => {
+  const data = student.toObject();
+  delete data.password;
+  delete data.loginOtpHash;
+  delete data.loginOtpExpiresAt;
+  return data;
+};
 
 exports.signUp = async (req, res) => {
   try {
@@ -15,13 +31,72 @@ exports.signUp = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const student = await StudentModel.findOne({ email, password, login: true });
+    const normalizedEmail = email && email.trim().toLowerCase();
+    const student = await StudentModel.findOne({ email: normalizedEmail, password, login: true })
+      .select('+loginOtpHash +loginOtpExpiresAt');
     if (!student) {
       return res.status(401).json({ success: false, message: 'Email or password is incorrect' });
     }
-    res.status(200).json({ success: true, data: student });
+
+    const code = createLoginOtp();
+    student.loginOtpHash = hashLoginOtp(code);
+    student.loginOtpExpiresAt = new Date(Date.now() + LOGIN_OTP_DURATION_MS);
+    await student.save();
+    await sendLoginCode(student.email, code);
+
+    res.status(200).json({
+      success: true,
+      requiresVerification: true,
+      data: { studentId: student._id, email: student.email, expiresIn: 600 }
+    });
+  } catch (error) {
+    res.status(error.status || 400).json({ success: false, message: error.message });
+  }
+};
+
+exports.verifyLogin = async (req, res) => {
+  try {
+    const { studentId, code } = req.body;
+    if (!studentId || !/^\d{6}$/.test(String(code || ''))) {
+      return res.status(400).json({ success: false, message: 'studentId and a 6-digit code are required' });
+    }
+
+    const student = await StudentModel.findById(studentId).select('+loginOtpHash +loginOtpExpiresAt');
+    if (!student || !student.loginOtpHash) {
+      return res.status(401).json({ success: false, message: 'Verification code is invalid or expired' });
+    }
+    if (!student.loginOtpExpiresAt || student.loginOtpExpiresAt.getTime() < Date.now()) {
+      return res.status(401).json({ success: false, message: 'Verification code is expired' });
+    }
+    if (hashLoginOtp(String(code)) !== student.loginOtpHash) {
+      return res.status(401).json({ success: false, message: 'Verification code is incorrect' });
+    }
+
+    student.loginOtpHash = undefined;
+    student.loginOtpExpiresAt = undefined;
+    await student.save();
+    res.status(200).json({ success: true, data: publicStudent(student) });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+exports.resendLoginCode = async (req, res) => {
+  try {
+    const { studentId } = req.body;
+    if (!studentId) return res.status(400).json({ success: false, message: 'studentId is required' });
+
+    const student = await StudentModel.findById(studentId).select('+loginOtpHash +loginOtpExpiresAt');
+    if (!student) return res.status(404).json({ success: false, message: 'Student not found' });
+
+    const code = createLoginOtp();
+    student.loginOtpHash = hashLoginOtp(code);
+    student.loginOtpExpiresAt = new Date(Date.now() + LOGIN_OTP_DURATION_MS);
+    await student.save();
+    await sendLoginCode(student.email, code);
+    res.status(200).json({ success: true, message: 'Verification code sent', expiresIn: 600 });
+  } catch (error) {
+    res.status(error.status || 400).json({ success: false, message: error.message });
   }
 };
 
