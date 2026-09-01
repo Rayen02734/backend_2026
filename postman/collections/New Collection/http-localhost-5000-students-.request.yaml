@@ -1,0 +1,19 @@
+$kind: http-request
+name: http://localhost:5000/students/
+description: ""
+url: http://localhost:5000/students/
+method: GET
+body:
+  type: json
+  content: "{\r
+
+    \    \"name\":\"Amir\",\r
+
+    \    \"firstName\":\"Eid\",\r
+
+    \    \"email\":\"amir02@gmail.com\",\r
+
+    \    \"password\":\"14iuhy\"\r
+
+    }"
+order: 1788274500629
